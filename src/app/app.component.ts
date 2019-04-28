@@ -7,11 +7,7 @@ import {
 } from '@angular/core';
 import * as d3 from 'd3';
 import { mockData } from 'src/util/mockData';
-import {
-  getMinElement,
-  getMaxElement,
-  createArrowButton
-} from 'src/util/helperMethods';
+import { getNextDate, createArrowButton } from 'src/util/helperMethods';
 import { leftIconPath, rightIconPath } from 'src/util/constants';
 import { Snapshot } from 'src/models/Snapshot';
 import dateUtil from 'src/util/dateUtils';
@@ -67,8 +63,7 @@ export class AppComponent implements OnInit, AfterContentInit {
     const ticks = 8;
 
     /*	Find the earliest and latest time in the range */
-    let timeFirst = getMinElement(data);
-    let timeLast = getMaxElement(data);
+    let { timeFirst, timeLast } = getNextDate(data);
 
     // Store current date
     currentDay = timeFirst.getDate();
@@ -191,8 +186,7 @@ export class AppComponent implements OnInit, AfterContentInit {
 
     function updateTimeseries() {
       if (data && data.length > 0) {
-        timeFirst = getMinElement(data, timeFirst);
-        timeLast = getMaxElement(data);
+        ({ timeFirst, timeLast } = getNextDate(data, timeFirst));
 
         /*	Replace the values used in the x domain */
         x.domain([timeFirst, timeLast]);

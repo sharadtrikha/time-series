@@ -2,28 +2,17 @@ import * as d3 from 'd3';
 import { Snapshot } from 'src/models/Snapshot';
 import dateUtil from './dateUtils';
 
-export const getMinElement = (data, timeFirst?: Date) => {
-  const dateData = data.map((d: Snapshot) => new Date(d.timestamp));
+export const getNextDate = (data, prevTimeFirst?: Date) => {
+  const finalData = data
+    .map((d: Snapshot) => new Date(d.timestamp))
+    .filter((date: Date) => {
+      return !(prevTimeFirst && dateUtil.isDateBefore(date, prevTimeFirst));
+    });
 
-  const finalData = dateData.filter((date: Date) => {
-    if (timeFirst && dateUtil.isDateBefore(date, timeFirst)) {
-      console.log(timeFirst, date);
-      return;
-    }
-    return date;
-  });
-
-  return d3.min(finalData, (d: Date) => {
-    // const date = new Date(d.timestamp);
-    // return date;
-    return d;
-  });
-};
-
-export const getMaxElement = (data, timeFirst?: Date) => {
-  return d3.max(data, (d: Snapshot) => {
-    return new Date(d.timestamp);
-  });
+  const timeFirst = d3.min(finalData, (d: Date) => d);
+  const timeLast = new Date(timeFirst);
+  timeLast.setDate(timeLast.getDate() + 1);
+  return { timeFirst, timeLast };
 };
 
 export const createArrowButton = ({

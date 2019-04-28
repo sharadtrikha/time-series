@@ -1,4 +1,10 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  OnInit,
+  AfterContentInit
+} from '@angular/core';
 import * as d3 from 'd3';
 import { svg } from 'd3';
 import { mockData } from 'src/util/mockData';
@@ -8,13 +14,15 @@ import {
   createArrowButton
 } from 'src/util/helperMethods';
 import { leftIconPath, rightIconPath } from 'src/util/constants';
+import { Snapshot } from 'src/models/Snapshot';
+import dateUtil from 'src/util/dateUtils';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, AfterContentInit {
   title = 'time-series';
   data = [];
   datum = [];
@@ -120,11 +128,7 @@ export class AppComponent {
       data.filter(d => {
         if (d && d.timestamp) {
           const elem = new Date(d.timestamp);
-          if (
-            elem.getDate() === timeFirst.getDate() &&
-            elem.getMonth() === timeFirst.getMonth() &&
-            elem.getFullYear() === timeFirst.getFullYear()
-          ) {
+          if (dateUtil.isDateEquals(elem, timeFirst)) {
             return d;
           }
         }
@@ -134,8 +138,8 @@ export class AppComponent {
     let rect = rectangles
       .enter()
       .append('rect')
-      .attr('x', (d, i) => x(new Date(d.timestamp)))
-      .attr('y', d => {
+      .attr('x', (d: Snapshot, i) => x(new Date(d.timestamp)))
+      .attr('y', (d: Snapshot) => {
         switch (d.frequency) {
           case 'daily':
             return 5;
@@ -151,7 +155,7 @@ export class AppComponent {
       })
       .attr('width', 10)
       .attr('height', 10)
-      .attr('fill', d => {
+      .attr('fill', (d: Snapshot) => {
         switch (d.frequency) {
           case 'daily':
             return 'red';
@@ -165,7 +169,7 @@ export class AppComponent {
             return 'black';
         }
       })
-      .on('mouseover', function(d, i) {
+      .on('mouseover', function(d: Snapshot, i) {
         d3.select('.tooltip').html(
           `<p>${new Date(d.timestamp)}- <br /> ${d.frequency}</p>`
         );
@@ -193,8 +197,6 @@ export class AppComponent {
       });
 
     function updateTimeseries() {
-      console.log(data);
-      console.log(currentYear);
       // data = data.filter(d => {
       //   const elemTimestamp = new Date(d.timestamp)
       //   if (elemTimestamp.getDate() > currentDay ||
@@ -205,45 +207,8 @@ export class AppComponent {
       // })
 
       if (data && data.length > 0) {
-        let sampleDate;
-        timeFirst = d3.min(data, function(d) {
-          return new Date(d.timestamp);
-        });
-        sampleDate = timeFirst;
-        console.log(sampleDate);
-        let newMinDate = d3.min(data, function(d) {
-          const tempDate = new Date(d.timestamp);
-          if (
-            sampleDate.getDate() >= tempDate.getDate() &&
-            sampleDate.getMonth() === tempDate.getMonth() &&
-            sampleDate.getFullYear() === tempDate.getFullYear()
-          ) {
-            console.log('same date');
-            return null;
-          } else {
-            return tempDate;
-          }
-        });
-        sampleDate = newMinDate;
-        console.log(newMinDate);
-        newMinDate = d3.min(data, function(d) {
-          const tempDate = new Date(d.timestamp);
-          if (
-            sampleDate.getDate() === tempDate.getDate() &&
-            sampleDate.getMonth() === tempDate.getMonth() &&
-            sampleDate.getFullYear() === tempDate.getFullYear()
-          ) {
-            console.log('same date');
-            return null;
-          } else {
-            return tempDate;
-          }
-        });
-        sampleDate = newMinDate;
-        console.log(newMinDate);
-        timeLast = d3.max(data, function(d) {
-          return new Date(d.timestamp);
-        });
+        timeFirst = getMinElement(data);
+        timeLast = getMaxElement(data);
 
         /*	Replace the values used in the x domain */
         x.domain([timeFirst, timeLast]);
@@ -280,7 +245,7 @@ export class AppComponent {
           })
         );
 
-        rect.transition().attr('x', (d, i) => {
+        rect.transition().attr('x', (d: Snapshot, i) => {
           return x(new Date(d.timestamp));
         });
 

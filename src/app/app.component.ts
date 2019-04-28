@@ -63,7 +63,7 @@ export class AppComponent implements OnInit, AfterContentInit {
     const ticks = 8;
 
     /*	Find the earliest and latest time in the range */
-    let { timeFirst, timeLast } = getNextDate(data);
+    let { timeFirst, timeLast } = getNextDate(true, data);
 
     // Store current date
     currentDay = timeFirst.getDate();
@@ -75,7 +75,11 @@ export class AppComponent implements OnInit, AfterContentInit {
       backgroundPath: leftIconPath,
       pathTransform: 'translate(0,0), scale(1.5)',
       transform: 'translate(25,25)',
-      onClick: () => {}
+      onClick: e => {
+        updateTimeseries(false);
+        d3.event.preventDefault();
+        return false;
+      }
     });
 
     const g = svg
@@ -88,7 +92,7 @@ export class AppComponent implements OnInit, AfterContentInit {
       pathTransform: `translate(${width + 60},0), scale(1.5)`,
       transform: `translate(${width + 80},25)`,
       onClick: e => {
-        updateTimeseries();
+        updateTimeseries(true);
         d3.event.preventDefault();
         return false;
       }
@@ -184,9 +188,9 @@ export class AppComponent implements OnInit, AfterContentInit {
         tooltip.style.display = 'none';
       });
 
-    function updateTimeseries() {
+    function updateTimeseries(isNext) {
       if (data && data.length > 0) {
-        ({ timeFirst, timeLast } = getNextDate(data, timeFirst));
+        ({ timeFirst, timeLast } = getNextDate(isNext, data, timeFirst));
 
         /*	Replace the values used in the x domain */
         x.domain([timeFirst, timeLast]);

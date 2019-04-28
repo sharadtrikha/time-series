@@ -6,7 +6,6 @@ import {
   AfterContentInit
 } from '@angular/core';
 import * as d3 from 'd3';
-import { svg } from 'd3';
 import { mockData } from 'src/util/mockData';
 import {
   getMinElement,
@@ -16,6 +15,7 @@ import {
 import { leftIconPath, rightIconPath } from 'src/util/constants';
 import { Snapshot } from 'src/models/Snapshot';
 import dateUtil from 'src/util/dateUtils';
+import { SVGUtils } from 'src/util/SVGUtils';
 
 @Component({
   selector: 'app-root',
@@ -50,7 +50,7 @@ export class AppComponent implements OnInit, AfterContentInit {
     let currentDay: number;
     let currentMonth: number;
     let currentYear: number;
-    const data = this.mapResponse(this.datum);
+    let data = this.mapResponse(this.datum);
 
     const margin = {
       top: 10,
@@ -58,9 +58,8 @@ export class AppComponent implements OnInit, AfterContentInit {
       left: 50,
       right: 50
     };
-
-    const width = 1000 - margin.left - margin.right;
-    const height = 200 - margin.top - margin.bottom;
+    const svgUtils = new SVGUtils(margin);
+    const { svg, width, height } = svgUtils;
 
     /*	A global variable to control which event/location to show */
     const counter = 0;
@@ -75,12 +74,6 @@ export class AppComponent implements OnInit, AfterContentInit {
     currentDay = timeFirst.getDate();
     currentMonth = timeFirst.getMonth();
     currentYear = timeFirst.getFullYear();
-
-    const svg = d3
-      .select('#chart')
-      .append('svg')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom);
 
     const leftButton = createArrowButton({
       svg,
@@ -174,13 +167,13 @@ export class AppComponent implements OnInit, AfterContentInit {
           `<p>${new Date(d.timestamp)}- <br /> ${d.frequency}</p>`
         );
 
-        const eventLeft = parseInt(d3.select(this).attr('x'));
-        const eventWidth = parseInt(d3.select(this).attr('width'));
+        const eventLeft = parseInt(d3.select(this).attr('x'), 10);
+        const eventWidth = parseInt(d3.select(this).attr('width'), 10);
 
-        const eventTop = parseInt(d3.select(this).attr('y'));
-        const tooltip = <HTMLElement>document.querySelector('.tooltip');
+        const eventTop = parseInt(d3.select(this).attr('y'), 10);
+        const tooltip = document.querySelector('.tooltip') as HTMLElement;
 
-        const tooltipHeight = parseInt(tooltip.style.height);
+        const tooltipHeight = parseInt(tooltip.style.height, 10);
 
         tooltip.style.position = 'absolute';
         tooltip.style.left = `${eventLeft + eventWidth / 2}px`;
@@ -191,20 +184,23 @@ export class AppComponent implements OnInit, AfterContentInit {
         tooltip.style.transition = '0.2s display';
       })
       .on('mouseout', () => {
-        const tooltip = <HTMLElement>document.querySelector('.tooltip');
+        const tooltip = document.querySelector('.tooltip') as HTMLElement;
         tooltip.style.opacity = '0';
         tooltip.style.display = 'none';
       });
 
     function updateTimeseries() {
-      // data = data.filter(d => {
-      //   const elemTimestamp = new Date(d.timestamp)
-      //   if (elemTimestamp.getDate() > currentDay ||
-      //     elemTimestamp.getMonth() > currentMonth ||
-      //     elemTimestamp.getFullYear() > currentYear) {
-      //     return d
-      //   }
-      // })
+      debugger;
+      data = data.filter(d => {
+        const elemTimestamp = new Date(d.timestamp);
+        if (
+          elemTimestamp.getDate() > currentDay ||
+          elemTimestamp.getMonth() > currentMonth ||
+          elemTimestamp.getFullYear() > currentYear
+        ) {
+          return d;
+        }
+      });
 
       if (data && data.length > 0) {
         timeFirst = getMinElement(data);

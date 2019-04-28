@@ -1,16 +1,29 @@
 import * as d3 from 'd3';
-import { leftIconPath, rightIconPath } from './constants';
+import { Snapshot } from 'src/models/Snapshot';
+import dateUtil from './dateUtils';
 
-const commonMapper = d => {
-  return new Date(d.timestamp);
+export const getMinElement = (data, timeFirst?: Date) => {
+  const dateData = data.map((d: Snapshot) => new Date(d.timestamp));
+
+  const finalData = dateData.filter((date: Date) => {
+    if (timeFirst && dateUtil.isDateBefore(date, timeFirst)) {
+      console.log(timeFirst, date);
+      return;
+    }
+    return date;
+  });
+
+  return d3.min(finalData, (d: Date) => {
+    // const date = new Date(d.timestamp);
+    // return date;
+    return d;
+  });
 };
 
-export const getMinElement = data => {
-  return d3.min(data, commonMapper);
-};
-
-export const getMaxElement = data => {
-  return d3.max(data, commonMapper);
+export const getMaxElement = (data, timeFirst?: Date) => {
+  return d3.max(data, (d: Snapshot) => {
+    return new Date(d.timestamp);
+  });
 };
 
 export const createArrowButton = ({

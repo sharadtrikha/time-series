@@ -50,7 +50,7 @@ export class AppComponent implements OnInit, AfterContentInit {
     let currentDay: number;
     let currentMonth: number;
     let currentYear: number;
-    let data = this.mapResponse(this.datum);
+    const data = this.mapResponse(this.datum);
 
     const margin = {
       top: 10,
@@ -190,20 +190,8 @@ export class AppComponent implements OnInit, AfterContentInit {
       });
 
     function updateTimeseries() {
-      debugger;
-      data = data.filter(d => {
-        const elemTimestamp = new Date(d.timestamp);
-        if (
-          elemTimestamp.getDate() > currentDay ||
-          elemTimestamp.getMonth() > currentMonth ||
-          elemTimestamp.getFullYear() > currentYear
-        ) {
-          return d;
-        }
-      });
-
       if (data && data.length > 0) {
-        timeFirst = getMinElement(data);
+        timeFirst = getMinElement(data, timeFirst);
         timeLast = getMaxElement(data);
 
         /*	Replace the values used in the x domain */

@@ -52,20 +52,20 @@ export class AppComponent implements OnInit, AfterContentInit {
     let currentYear: number;
     const data = this.mapResponse(this.datum);
 
-    let margin = {
+    const margin = {
       top: 10,
       bottom: 100,
       left: 50,
       right: 50
     };
 
-    let width = 1000 - margin.left - margin.right;
-    let height = 200 - margin.top - margin.bottom;
+    const width = 1000 - margin.left - margin.right;
+    const height = 200 - margin.top - margin.bottom;
 
     /*	A global variable to control which event/location to show */
-    let counter = 0;
+    const counter = 0;
     /*	A global variable to control the amout of ticks visible */
-    let ticks = 8;
+    const ticks = 8;
 
     /*	Find the earliest and latest time in the range */
     let timeFirst = getMinElement(data);
@@ -90,7 +90,7 @@ export class AppComponent implements OnInit, AfterContentInit {
       onClick: () => {}
     });
 
-    let g = svg
+    const g = svg
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -114,7 +114,7 @@ export class AppComponent implements OnInit, AfterContentInit {
 
     /* X-Axis */
 
-    let xAxisCall = d3
+    const xAxisCall = d3
       .axisBottom(x)
       .ticks(d3.timeHour)
       .tickFormat(d3.timeFormat('%I %p'));
@@ -135,7 +135,7 @@ export class AppComponent implements OnInit, AfterContentInit {
       })
     );
 
-    let rect = rectangles
+    const rect = rectangles
       .enter()
       .append('rect')
       .attr('x', (d: Snapshot, i) => x(new Date(d.timestamp)))
@@ -174,13 +174,13 @@ export class AppComponent implements OnInit, AfterContentInit {
           `<p>${new Date(d.timestamp)}- <br /> ${d.frequency}</p>`
         );
 
-        let eventLeft = parseInt(d3.select(this).attr('x'));
-        let eventWidth = parseInt(d3.select(this).attr('width'));
+        const eventLeft = parseInt(d3.select(this).attr('x'));
+        const eventWidth = parseInt(d3.select(this).attr('width'));
 
-        let eventTop = parseInt(d3.select(this).attr('y'));
-        let tooltip = <HTMLElement>document.querySelector('.tooltip');
+        const eventTop = parseInt(d3.select(this).attr('y'));
+        const tooltip = <HTMLElement>document.querySelector('.tooltip');
 
-        let tooltipHeight = parseInt(tooltip.style.height);
+        const tooltipHeight = parseInt(tooltip.style.height);
 
         tooltip.style.position = 'absolute';
         tooltip.style.left = `${eventLeft + eventWidth / 2}px`;
@@ -191,7 +191,7 @@ export class AppComponent implements OnInit, AfterContentInit {
         tooltip.style.transition = '0.2s display';
       })
       .on('mouseout', () => {
-        let tooltip = <HTMLElement>document.querySelector('.tooltip');
+        const tooltip = <HTMLElement>document.querySelector('.tooltip');
         tooltip.style.opacity = '0';
         tooltip.style.display = 'none';
       });
